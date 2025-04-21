@@ -1,0 +1,32 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm p-4">
+        <h4 class="mb-4 text-center">Create a New Post</h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                <input type="text" name="title" class="form-control" id="id_title" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_content" class="form-label">Content</label>
+                <textarea name="content" class="form-control" id="id_content" rows="5" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_image" class="form-label">Image</label>
+                <input type="file" name="image" class="form-control" id="id_image">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-4">Post</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

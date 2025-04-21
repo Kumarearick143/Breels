@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Breels</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    {% block extra_head %}{% endblock %}
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .main-content {
+            padding-top: 10px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<!-- Inside your <nav class="navbar ..."> -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm py-2 sticky-top">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand fw-bold fs-4" href="{% url 'home' %}">Breels</a>
+
+    <!-- Search Form (centered) -->
+    <form class="d-flex mx-auto w-50" role="search" method="GET" action="{% url 'search' %}">
+      <input class="form-control me-2" type="search" name="q" placeholder="Search posts or products..." aria-label="Search">
+      <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+
+    <!-- Toggle for mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Right-side icons -->
+    <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+      <ul class="navbar-nav align-items-center gap-2">
+
+        {% if user.is_authenticated %}
+        <!-- Chat Icon -->
+        <li class="nav-item">
+          <a class="nav-link fs-5" href="{% url 'chat' %}" title="Messages">
+            <i class="bi bi-chat-dots"></i>
+          </a>
+        </li>
+
+        <!-- Likes Icon -->
+        <li class="nav-item">
+          <a class="nav-link fs-5" href="#" title="Likes">
+            <i class="bi bi-heart"></i>
+          </a>
+        </li>
+
+        <!-- Cart Icon -->
+        <li class="nav-item">
+          <a class="nav-link fs-5 position-relative" href="{% url 'view_cart' %}" title="Cart">
+            <i class="bi bi-cart"></i>
+            {% if cart_items_count %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ cart_items_count }}
+            </span>
+            {% endif %}
+          </a>
+        </li>
+
+        <!-- User Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle fw-medium" href="#" role="button" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            {{ user.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'profile' user.username %}"><i class="bi bi-person"></i> My Profile</a></li>
+            <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger border-0 bg-transparent">Logout</button>
+              </form>
+            </li>
+          </ul>
+        </li>
+
+        {% else %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

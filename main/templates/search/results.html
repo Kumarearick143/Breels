@@ -1,0 +1,57 @@
+{% extends 'main/base.html' %}
+{% block content %}
+
+<div class="container my-4">
+    <h2 class="mb-4">Search Results</h2>
+
+    <!-- Search Bar -->
+    <form method="get" action="{% url 'search' %}" class="input-group mb-4">
+        <input type="text" name="q" class="form-control" placeholder="Search users or posts..." value="{{ query }}">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+
+    <!-- Users -->
+    <div class="mb-5">
+        <h4 class="mb-3"><i class="bi bi-people-fill me-2"></i>Users</h4>
+        {% if users %}
+        <ul class="list-group shadow-sm">
+            {% for user in users %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'profile' user.username %}" class="text-decoration-none fw-medium">
+                    {{ user.username }}
+                </a>
+                <i class="bi bi-person-circle text-secondary"></i>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="alert alert-info">No users found.</div>
+        {% endif %}
+    </div>
+
+    <!-- Posts -->
+    <div>
+        <h4 class="mb-3"><i class="bi bi-file-post me-2"></i>Posts</h4>
+        {% if posts %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for post in posts %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text text-muted">{{ post.content|truncatewords:25 }}</p>
+                        <a href="{% url 'profile' post.author.username %}" class="card-link">
+                            By {{ post.author.username }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">No posts found.</div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

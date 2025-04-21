@@ -1,0 +1,27 @@
+{% extends 'main/base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: #007bff;">Edit Post</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label>Title:</label><br>
+        {{ form.title }}<br><br>
+
+        <label>Content:</label><br>
+        {{ form.content }}<br><br>
+
+        {% if form.instance.image %}
+            <label>Image: Currently:</label><br>
+            <a href="{{ form.instance.image.url }}" target="_blank">{{ form.instance.image.name }}</a><br>
+            {{ form.image.clear_checkbox }} Clear<br><br>
+        {% endif %}
+
+        <label>Change Image:</label><br>
+        {{ form.image }}<br><br>
+
+        <button type="submit" style="padding: 8px 20px; background: green; color: white; border: none; border-radius: 6px;">Save Changes</button>
+        <a href="{% url 'dashboard' %}" style="padding: 8px 20px; background: gray; color: white; text-decoration: none; border-radius: 6px; margin-left: 10px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

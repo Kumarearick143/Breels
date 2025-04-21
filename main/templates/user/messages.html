@@ -1,0 +1,222 @@
+{% extends 'main/base.html' %}
+
+{% block extra_head %}
+<style>
+:root {
+    --primary: #4F46E5;
+    --bg-light: #f9f9ff;
+    --text-light: #555;
+    --border-color: #e0e0e0;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: row;
+    height: 90vh;
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    background: #fff;
+}
+
+.chat-users {
+    width: 28%;
+    background: var(--bg-light);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+.chat-users h3 {
+    margin: 0;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    background: #f0f0f0;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-user {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.chat-user:hover {
+    background-color: #eaeaff;
+}
+
+.chat-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid var(--primary);
+}
+
+.chat-user span {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+.chat-messages {
+    width: 72%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.messages-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fafafe;
+}
+
+.message-item {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    max-width: 70%;
+    font-size: 15px;
+    word-wrap: break-word;
+    background: #e5e5ff;
+}
+
+.message-item.sender {
+    align-self: flex-end;
+    background: #d0eaff;
+}
+
+.chat-input {
+    display: flex;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    background: #f0f2f7;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    outline: none;
+    font-size: 15px;
+    transition: border 0.2s ease;
+}
+
+.chat-input input:focus {
+    border-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+    }
+    .chat-users {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .chat-messages {
+        width: 100%;
+        height: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-users" id="chat-users">
+        <h3>Chats</h3>
+        <div id="user-list"></div>
+    </div>
+    <div class="chat-messages">
+        <div class="messages-list" id="chat-messages">
+            <p style="text-align:center; color:#999;">Select a chat to start messaging</p>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="Type a message..." disabled>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const currentUser = "{{ request.user.username }}";
+let currentChatUser = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/messages/contacts/')
+        .then(res => res.json())
+        .then(users => {
+            const userList = document.getElementById('user-list');
+            if (users.length === 0) {
+                userList.innerHTML = '<p style="padding: 10px; color: #777;">No messages yet</p>';
+                return;
+            }
+
+            users.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'chat-user';
+                div.onclick = () => loadMessages(u.username);
+
+                const img = document.createElement('img');
+                img.src = u.profile_pic_url || '/static/default-avatar.png';
+
+                const name = document.createElement('span');
+                name.textContent = u.username;
+
+                div.appendChild(img);
+                div.appendChild(name);
+                userList.appendChild(div);
+            });
+        });
+
+    document.getElementById('chat-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && currentChatUser && this.value.trim() !== '') {
+            const content = this.value;
+            fetch('/messages/send/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ receiver: currentChatUser, content })
+            }).then(() => {
+                this.value = '';
+                loadMessages(currentChatUser);
+            });
+        }
+    });
+});
+
+function loadMessages(username) {
+    currentChatUser = username;
+    fetch(`/messages/${username}/`)
+        .then(res => res.json())
+        .then(messages => {
+            const msgDiv = document.getElementById('chat-messages');
+            msgDiv.innerHTML = '';
+            document.getElementById('chat-input').disabled = false;
+
+            messages.forEach(m => {
+                const msg = document.createElement('div');
+                msg.className = 'message-item';
+                if (m.sender === currentUser) {
+                    msg.classList.add('sender');
+                }
+                msg.textContent = m.content;
+                msgDiv.appendChild(msg);
+            });
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        });
+}
+</script>
+{% endblock %}
