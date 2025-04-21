@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: breels
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn breels.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: breels.settings
